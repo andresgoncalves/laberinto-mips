@@ -8,8 +8,23 @@ VIDEO_MEMORY: .space VIDEO_MEMORY_SIZE
 MAP_MEMORY: .space MAP_MEMORY_SIZE
 PLAYER:  .space 8
 ENEMIES: .space 32
+
+Octal_Result: .space 20
 	
 	.text
+#------------------------Macro Para Transformar de Decimal a Octal ----------------------------------------------------------------#
+	.macro DecimalToOctal(%decimal)
+	li $t7 8 #Base 8 por la que vamos a dividir
+	li $t8 0 #Este sera el resultado
+	deciOctal_loop: 
+		    div %decimal, $t7    # Dividir el número por 8
+    		    mfhi $t6        
+                    addi $t6, $t6, '0' # Convertir el residuo a carácter para poder ser guardado
+                    sb $t6, Octal_Result($t8) # Almacenar 
+                    addi $t8, $t8, 1  # Incrementar la posición del space del resultado en donde estamos guardando
+                    mflo %decimal        # Actualizar el número ingresado
+                    bnez %decimal, loop   
+		
 	.globl main
 	
 main:
