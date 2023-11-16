@@ -23,7 +23,24 @@ Octal_Result: .space 20
                     sb $t6, Octal_Result($t8) # Almacenar 
                     addi $t8, $t8, 1  # Incrementar la posición del space del resultado en donde estamos guardando
                     mflo %decimal        # Actualizar el número ingresado
-                    bnez %decimal, loop   
+                    bnez %decimal, deciOctal_loop
+          .end_macro 
+                    
+#-------------------------------Macro para Transformar de Decimal a Binario-------------------------------------------------#
+#------------------------Macro Para Transformar de Decimal a Octal ----------------------------------------------------------------#
+	.macro DecimalToBinary(%decimal)
+	li $t7 2 #Base 2 por la que vamos a dividir
+	li $t8 0 #Este sera el resultado
+	deciOctal_loop: 
+		    div %decimal, $t7    # Dividir el número por 2
+    		    mfhi $t6        
+                    addi $t6, $t6, '0' # Convertir el residuo a carácter para poder ser guardado
+                    sb $t6, Octal_Result($t8) # Almacenar 
+                    addi $t8, $t8, 1  # Incrementar la posición del space del resultado en donde estamos guardando
+                    mflo %decimal        # Actualizar el número ingresado
+                    bnez %decimal, deciOctal_loop
+           .end_macro 
+      
 		
 	.globl main
 	
