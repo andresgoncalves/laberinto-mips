@@ -1,14 +1,14 @@
 
 # ----- VIDEO CONSTANTS ----- #
 
-.eqv VIDEO_WIDTH 0x20 # 1024/32 = 0x20
-.eqv VIDEO_HEIGHT 0x20 # 1024/32 = 0x20
+.eqv VIDEO_WIDTH 0x10 # 512/32 = 0x10
+.eqv VIDEO_HEIGHT 0x10 # 512/32 = 0x10
 .eqv VIDEO_DEPTH 4 # 1 word = 4 bytes
 
-.eqv VIDEO_WIDTH_SHIFT 5 # 0x20 = 1 << 5
+.eqv VIDEO_WIDTH_SHIFT 4 # 0x10 = 1 << 4
 .eqv VIDEO_DEPTH_SHIFT 2 # 4 = 1 << 2
 
-.eqv VIDEO_MEMORY_SIZE 0x1000 # 0x20 * 0x20 * 4 = 0x1000
+.eqv VIDEO_MEMORY_SIZE 0x400 # 0x10 * 0x10 * 4 = 0x400
 
 # ----- COLOR CONSTANTS ----- #
 
