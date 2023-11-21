@@ -34,36 +34,55 @@ GAME_WON_MSG: .asciiz "GAME WON\nCoins: "
 GAME_LOST_MSG: .asciiz "GAME OVER"
 
 Octal_Result: .space 20
-
+Binary_Result: .space 20
+Hexadecimal_Result: .space 20  #Esto esta guardado al reves
+hex_digits:     .asciiz "0123456789ABCDEF"
+.text
+#------------------------Macro Para Transformar de Decimal a Octal ----------------------------------------------------------------#
 .macro DecimalToOctal(%decimal)
 	li $t7 8 #Base 8 por la que vamos a dividir
-	li $t8 0 #Este sera el resultado
+	li $t8 0 
 	deciOctal_loop: 
-		    div %decimal, $t7    # Dividir el nï¿½mero por 8
+		    div %decimal, $t7    # Dividir el numero por 8
     		    mfhi $t6        
-                    addi $t6, $t6, '0' # Convertir el residuo a carï¿½cter para poder ser guardado
+                    addi $t6, $t6, '0' # Convertir el residuo a caracter para poder ser guardado
                     sb $t6, Octal_Result($t8) # Almacenar 
-                    addi $t8, $t8, 1  # Incrementar la posiciï¿½n del space del resultado en donde estamos guardando
-                    mflo %decimal        # Actualizar el nï¿½mero ingresado
+                    addi $t8, $t8, 1  # Incrementar la posicionn del space del resultado en donde estamos guardando
+                    mflo %decimal        # Actualizar el numero ingresado
                     bnez %decimal, deciOctal_loop
           .end_macro 
                     
 #-------------------------------Macro para Transformar de Decimal a Binario-------------------------------------------------#
-#------------------------Macro Para Transformar de Decimal a Octal ----------------------------------------------------------------#
+
 	.macro DecimalToBinary(%decimal)
 	li $t7 2 #Base 2 por la que vamos a dividir
-	li $t8 0 #Este sera el resultado
+	li $t8 0 
 	deciOctal_loop: 
-		    div %decimal, $t7    # Dividir el nï¿½mero por 2
+		    div %decimal, $t7    # Dividir el numero por 2
     		    mfhi $t6        
-                    addi $t6, $t6, '0' # Convertir el residuo a carï¿½cter para poder ser guardado
-                    sb $t6, Octal_Result($t8) # Almacenar 
-                    addi $t8, $t8, 1  # Incrementar la posiciï¿½n del space del resultado en donde estamos guardando
-                    mflo %decimal        # Actualizar el nï¿½mero ingresado
+                    addi $t6, $t6, '0' # Convertir el residuo a caracter para poder ser guardado
+                    sb $t6, Binary_Result($t8) # Almacenar 
+                    addi $t8, $t8, 1  # Incrementar la posicion del space del resultado en donde estamos guardando
+                    mflo %decimal        # Actualizar el numeromero ingresado
                     bnez %decimal, deciOctal_loop
            .end_macro 
-      
-	.text
+           
+ #-----------------Macro para Transformar de Decimal a Hexadecimal ---------------------------------------#
+ 	.macro DecimalToHexa(%decimal)
+     li $t1, 16       # Base 16
+
+    
+    li $t3, 0        # Inicializar el resultado en hexadecimal
+loop:
+    divu %decimal, $t1    # Dividir el número por 16
+    mfhi $t2         # Obtener el residuo
+    lb $a0, hex_digits($t2)  # Obtener el carácter correspondiente al residuo de la cadena de digitos declarada
+    sb $a0, Hexadecimal_Result($t3)   # Almacenar el carácter en la cadena de resultado
+    addi $t3, $t3, 1  # Incrementar la posición en la cadena de resultado
+    mflo %decimal         # Actualizar el número para la próxima iteración
+    bnez %decimal, loop   # Repetir el bucle si el número no es cero
+    .end_macro 
+
 	.globl main
 	
 main:
