@@ -25,13 +25,22 @@ MAP_MEMORY:
 TILE_COLORS: TILE_COLORS
 PLAYER:
 	.word 1, 1, 0, 0 # 0: X coord, 4: Y coord, 8: Coins
-ENEMIES:
+ENEMIES_EASY:
 	.word  1,  8, 0, 0
 	.word  7,  4, 0, 0
 	.word 14,  1, 0, 0
 	.word 14, 12, 0, 0
+	
+ENEMIES_HARD:
+	.word  1,  8, 0, 0
+	.word  7,  4, 0, 0
+	.word 14,  1, 0, 0
+	.word 14, 12, 0, 0
+	.word 7 , 10, 0, 0
+	.word 12, 5, 0 , 0
 GAME_WON_MSG: .asciiz "GAME WON\nCoins: "
 GAME_LOST_MSG: .asciiz "GAME OVER"
+SELECT_DIFFICULTY: .asciiz "Selecciona la dificultad: 1 Fácil 2 Difícil\n"
 
 Octal_Result: .space 20
 Binary_Result: .space 20
@@ -87,7 +96,21 @@ loop:
 	
 main:
 
-main_prepare_map:
+	    # Preguntar al usuario la dificultad
+    li $v0, 4
+    la $a0, SELECT_DIFFICULTY
+    syscall
+    
+    li $v0, 5
+    syscall
+    move $t6, $v0  # Almacena la elección del usuario en $t6
+    
+    beq $t6, 1, main_prepare_map_easy
+    beq $t6, 2, main_prepare_map_hard
+    b main
+    
+
+main_prepare_map_easy:
 	lw $t0, PLAYER+0
 	lw $t1, PLAYER+4
 	LOAD_MAP_OFFSET($t2, $t0, $t1)
@@ -95,33 +118,85 @@ main_prepare_map:
 	SET_TILE($t0, T_PLAYER)
 	sb $t0, MAP_MEMORY($t2)
 	
-	lw $t0, ENEMIES+0x00
-	lw $t1, ENEMIES+0x04
+	lw $t0, ENEMIES_EASY+0x00
+	lw $t1, ENEMIES_EASY+0x04
 	LOAD_MAP_OFFSET($t2, $t0, $t1)
 	lbu $t0, MAP_MEMORY($t2)
 	SET_TILE($t0, T_ENEMY)
 	sb $t0, MAP_MEMORY($t2)
 	
-	lw $t0, ENEMIES+0x10
-	lw $t1, ENEMIES+0x14
+	lw $t0, ENEMIES_EASY+0x10
+	lw $t1, ENEMIES_EASY+0x14
 	LOAD_MAP_OFFSET($t2, $t0, $t1)
 	lbu $t0, MAP_MEMORY($t2)
 	SET_TILE($t0, T_ENEMY)
 	sb $t0, MAP_MEMORY($t2)
 	
-	lw $t0, ENEMIES+0x20
-	lw $t1, ENEMIES+0x24
+	lw $t0, ENEMIES_EASY+0x20
+	lw $t1, ENEMIES_EASY+0x24
 	LOAD_MAP_OFFSET($t2, $t0, $t1)
 	lbu $t0, MAP_MEMORY($t2)
 	SET_TILE($t0, T_ENEMY)
 	sb $t0, MAP_MEMORY($t2)
 	
-	lw $t0, ENEMIES+0x30
-	lw $t1, ENEMIES+0x34
+	lw $t0, ENEMIES_EASY+0x30
+	lw $t1, ENEMIES_EASY+0x34
 	LOAD_MAP_OFFSET($t2, $t0, $t1)
 	lbu $t0, MAP_MEMORY($t2)
 	SET_TILE($t0, T_ENEMY)
 	sb $t0, MAP_MEMORY($t2)
+	j main_loop
+	
+main_prepare_map_hard:
+	lw $t0, PLAYER+0
+	lw $t1, PLAYER+4
+	LOAD_MAP_OFFSET($t2, $t0, $t1)
+	lbu $t0, MAP_MEMORY($t2)
+	SET_TILE($t0, T_PLAYER)
+	sb $t0, MAP_MEMORY($t2)
+	
+	lw $t0, ENEMIES_HARD+0x00
+	lw $t1, ENEMIES_HARD+0x04
+	LOAD_MAP_OFFSET($t2, $t0, $t1)
+	lbu $t0, MAP_MEMORY($t2)
+	SET_TILE($t0, T_ENEMY)
+	sb $t0, MAP_MEMORY($t2)
+	
+	lw $t0, ENEMIES_HARD+0x10
+	lw $t1, ENEMIES_HARD+0x14
+	LOAD_MAP_OFFSET($t2, $t0, $t1)
+	lbu $t0, MAP_MEMORY($t2)
+	SET_TILE($t0, T_ENEMY)
+	sb $t0, MAP_MEMORY($t2)
+	
+	lw $t0, ENEMIES_HARD+0x20
+	lw $t1, ENEMIES_HARD+0x24
+	LOAD_MAP_OFFSET($t2, $t0, $t1)
+	lbu $t0, MAP_MEMORY($t2)
+	SET_TILE($t0, T_ENEMY)
+	sb $t0, MAP_MEMORY($t2)
+	
+	lw $t0, ENEMIES_HARD+0x30
+	lw $t1, ENEMIES_HARD+0x34
+	LOAD_MAP_OFFSET($t2, $t0, $t1)
+	lbu $t0, MAP_MEMORY($t2)
+	SET_TILE($t0, T_ENEMY)
+	sb $t0, MAP_MEMORY($t2)
+	
+	lw $t0, ENEMIES_HARD+0x40
+	lw $t1, ENEMIES_HARD+0x44
+	LOAD_MAP_OFFSET($t2, $t0, $t1)
+	lbu $t0, MAP_MEMORY($t2)
+	SET_TILE($t0, T_ENEMY)
+	sb $t0, MAP_MEMORY($t2)
+	
+	lw $t0, ENEMIES_HARD+0x50
+	lw $t1, ENEMIES_HARD+0x54
+	LOAD_MAP_OFFSET($t2, $t0, $t1)
+	lbu $t0, MAP_MEMORY($t2)
+	SET_TILE($t0, T_ENEMY)
+	sb $t0, MAP_MEMORY($t2)
+	j main_loop
 	
 main_loop:
 	jal paint_map
@@ -152,18 +227,42 @@ main_poll_end:
 	beq $v0, 2, main_save_coin
 	beq $v0, 3, main_game_lost
 	beq $v0, 4, main_game_won
+	beq $t6, 1 main_loop_end_easy
+	beq $t6, 2 main_loop_end_hard
 
-main_loop_end:
-	la $a0, ENEMIES+0x00
+main_loop_end_easy:
+	la $a0, ENEMIES_EASY+0x00
 	jal move_enemy
 	bnez $v0, main_game_lost
-	la $a0, ENEMIES+0x10
+	la $a0, ENEMIES_EASY+0x10
 	jal move_enemy
 	bnez $v0, main_game_lost
-	la $a0, ENEMIES+0x20
+	la $a0, ENEMIES_EASY+0x20
 	jal move_enemy
 	bnez $v0, main_game_lost
-	la $a0, ENEMIES+0x30
+	la $a0, ENEMIES_EASY+0x30
+	jal move_enemy
+	bnez $v0, main_game_lost
+	
+	b main_loop
+	
+main_loop_end_hard:
+	la $a0, ENEMIES_HARD+0x00
+	jal move_enemy
+	bnez $v0, main_game_lost
+	la $a0, ENEMIES_HARD+0x10
+	jal move_enemy
+	bnez $v0, main_game_lost
+	la $a0, ENEMIES_HARD+0x20
+	jal move_enemy
+	bnez $v0, main_game_lost
+	la $a0, ENEMIES_HARD+0x30
+	jal move_enemy
+	bnez $v0, main_game_lost
+	la $a0, ENEMIES_HARD+0x40
+	jal move_enemy
+	bnez $v0, main_game_lost
+	la $a0, ENEMIES_HARD+0x50
 	jal move_enemy
 	bnez $v0, main_game_lost
 	
@@ -173,7 +272,8 @@ main_save_coin:
 	lw $t0, PLAYER+8
 	addu $t0, $t0, 1
 	sw $t0, PLAYER+8
-	b main_loop_end
+	beq $t6 1 main_loop_end_easy
+	beq $t6 2 main_loop_end_hard
 
 main_game_lost:
 	jal paint_map
