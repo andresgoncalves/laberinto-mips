@@ -44,7 +44,7 @@ BINARY_POINTS: .asciiz "\nPUNTUACION BINARIO: "
 OCTAL_POINTS: .asciiz "\nPUNTUACION OCTAL: "
 DECIMAL_POINTS: .asciiz "\nPUNTUACION DECIMAL: "
 GAME_LOST_MSG: .asciiz "GAME OVER..."
-SELECT_DIFFICULTY: .asciiz "Selecciona la dificultad: 1 Fácil 2 Difícil\n"
+SELECT_DIFFICULTY: .asciiz "Selecciona la dificultad: 1 Facil 2 Dificil\n"
 
 Octal_Result: .space 32
 Binary_Result: .space 32
@@ -238,7 +238,7 @@ main_save_coin:
    sw $t0, PLAYER+8         
 
    lw $t1, PLAYER+12       
-   addiu $t1, $t1, 100      # Incrementar la puntuación por cada moneda (100 puntos)
+   addiu $t1, $t1, 100      # Incrementar la puntuacionn por cada moneda (100 puntos)
    sw $t1, PLAYER+12      
 
    beq $s0, 1, main_loop_end_easy
@@ -261,7 +261,7 @@ main_game_won:
 	jal paint_map
 	
 	lw $t1, PLAYER+12       
-   	addiu $t1, $t1, 1200      # Incrementar la puntuación por Victoria (1200puntos)
+   	addiu $t1, $t1, 1200      # Incrementar la puntuacion por Victoria (1200puntos)
     sw $t1, PLAYER+12  
 	
 	la $a0, GAME_WON_MSG
@@ -601,7 +601,7 @@ decimal_to_hexadecimal__loop:
     divu $t0, $t1    
     mfhi $t2       
     mflo $t0
-    lb $t2, hex_digits($t2)  # Obtener el car�cter correspondiente al residuo de la cadena de digitos declarada
+    lb $t2, hex_digits($t2)  # Obtener el caracter correspondiente al residuo de la cadena de digitos declarada
     sb $t2, Hexadecimal_Result($t3)   
     bnez $t0, decimal_to_hexadecimal__loop  
     la $v0, Hexadecimal_Result($t3)
