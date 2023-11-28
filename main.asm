@@ -38,8 +38,11 @@ ENEMIES_HARD:
 	.word 14, 12, 0, 0
 	.word 7 , 10, 0, 0
 	.word 12, 5, 0 , 0
-GAME_WON_MSG: .asciiz "GAME WON\nCoins: "
-GAME_LOST_MSG: .asciiz "GAME OVER"
+GAME_WON_MSG: .asciiz "GAME WON\nPOINTS: "
+HEXA_POINTS: .asciiz "PUNTUACION HEXADECIMAL:"
+BINARY_POINTS: .asciiz "PUNTUACION BINARIO: "
+OCTAL_POINTS: .asciiz "PUNTUACION OCTAL:"
+GAME_LOST_MSG: .asciiz "GAME OVER\nPOINTS:"
 SELECT_DIFFICULTY: .asciiz "Selecciona la dificultad: 1 Fácil 2 Difícil\n"
 
 Octal_Result: .space 20
@@ -52,12 +55,12 @@ hex_digits:     .asciiz "0123456789ABCDEF"
 	li $t7 8 #Base 8 por la que vamos a dividir
 	li $t8 0 
 	deciOctal_loop: 
-		    div %decimal, $t7    # Dividir el numero por 8
+		    div %decimal, $t7    8
     		    mfhi $t6        
-                    addi $t6, $t6, '0' # Convertir el residuo a caracter para poder ser guardado
-                    sb $t6, Octal_Result($t8) # Almacenar 
-                    addi $t8, $t8, 1  # Incrementar la posicionn del space del resultado en donde estamos guardando
-                    mflo %decimal        # Actualizar el numero ingresado
+                    addi $t6, $t6, '0' 
+                    sb $t6, Octal_Result($t8
+                    addi $t8, $t8, 1  
+                    mflo %decimal       
                     bnez %decimal, deciOctal_loop
           .end_macro 
                     
@@ -67,12 +70,12 @@ hex_digits:     .asciiz "0123456789ABCDEF"
 	li $t7 2 #Base 2 por la que vamos a dividir
 	li $t8 0 
 	deciOctal_loop: 
-		    div %decimal, $t7    # Dividir el numero por 2
+		    div %decimal, $t7    
     		    mfhi $t6        
                     addi $t6, $t6, '0' # Convertir el residuo a caracter para poder ser guardado
-                    sb $t6, Binary_Result($t8) # Almacenar 
-                    addi $t8, $t8, 1  # Incrementar la posicion del space del resultado en donde estamos guardando
-                    mflo %decimal        # Actualizar el numeromero ingresado
+                    sb $t6, Binary_Result($t8) 
+                    addi $t8, $t8, 1  
+                    mflo %decimal        
                     bnez %decimal, deciOctal_loop
            .end_macro 
            
@@ -81,15 +84,15 @@ hex_digits:     .asciiz "0123456789ABCDEF"
      li $t1, 16       # Base 16
 
     
-    li $t3, 0        # Inicializar el resultado en hexadecimal
+    li $t3, 0        
 loop:
-    divu %decimal, $t1    # Dividir el número por 16
-    mfhi $t2         # Obtener el residuo
+    divu %decimal, $t1    
+    mfhi $t2       
     lb $a0, hex_digits($t2)  # Obtener el carácter correspondiente al residuo de la cadena de digitos declarada
-    sb $a0, Hexadecimal_Result($t3)   # Almacenar el carácter en la cadena de resultado
-    addi $t3, $t3, 1  # Incrementar la posición en la cadena de resultado
-    mflo %decimal         # Actualizar el número para la próxima iteración
-    bnez %decimal, loop   # Repetir el bucle si el número no es cero
+    sb $a0, Hexadecimal_Result($t3)   
+    addi $t3, $t3, 1  
+    mflo %decimal         
+    bnez %decimal, loop   
     .end_macro 
 
 	.globl main
@@ -103,7 +106,7 @@ main:
     
     li $v0, 5
     syscall
-    move $t6, $v0  # Almacena la elección del usuario en $t6
+    move $t6, $v0  # Almacena la dificultad
     
     beq $t6, 1, main_prepare_map_easy
     beq $t6, 2, main_prepare_map_hard
@@ -269,16 +272,26 @@ main_loop_end_hard:
 	b main_loop
 	
 main_save_coin:
-	lw $t0, PLAYER+8
-	addu $t0, $t0, 1
-	sw $t0, PLAYER+8
-	beq $t6 1 main_loop_end_easy
-	beq $t6 2 main_loop_end_hard
+   lw $t0, PLAYER+8         
+   addu $t0, $t0, 1         
+   sw $t0, PLAYER+8         
+
+   lw $t1, PLAYER+12       
+   addiu $t1, $t1, 100      # Incrementar la puntuación por cada moneda (100 puntos)
+   sw $t1, PLAYER+12      
+
+   beq $t6, 1, main_loop_end_easy
+   beq $t6, 2, main_loop_end_hard
+
 
 main_game_lost:
 	jal paint_map
 	la $a0, GAME_LOST_MSG
 	li $v0, 4
+	syscall
+	
+	lw $a0, PLAYER +12
+	li $v0, 1
 	syscall
 	
 	li $v0, 10
@@ -287,11 +300,15 @@ main_game_lost:
 main_game_won:
 	jal paint_map
 	
+	   lw $t1, PLAYER+12       
+   	   addiu $t1, $t1, 200      # Incrementar la puntuación por Victoria (200puntos)
+           sw $t1, PLAYER+12  
+	
 	la $a0, GAME_WON_MSG
 	li $v0, 4
 	syscall
 	
-	lw $a0, PLAYER+8
+	lw $a0, PLAYER+12
 	li $v0, 1
 	syscall
 	
