@@ -7,24 +7,24 @@
 VIDEO_MEMORY: .space VIDEO_MEMORY_SIZE
 MAP_MEMORY:
 	.byte 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8
-	.byte 8 0 0 0 0 0 0 0 0 1 0 0 0 0 0 8
+	.byte 8 0 0 0 0 0 0 0 0 0 0 0 0 0 0 8
 	.byte 8 0 8 8 0 8 8 0 8 0 8 8 0 8 0 8
 	.byte 8 0 8 8 0 8 8 0 8 0 8 8 0 8 0 8
-	.byte 8 0 0 0 0 0 0 0 0 0 0 0 0 1 0 8
+	.byte 8 0 0 0 0 0 0 0 0 0 0 0 0 0 0 8
 	.byte 8 0 8 8 0 8 8 0 8 0 8 8 0 8 0 8
 	.byte 8 0 8 8 0 8 8 0 8 0 8 8 0 8 0 8
 	.byte 8 0 8 8 0 8 8 0 8 0 8 8 0 8 0 8
-	.byte 8 0 1 0 0 1 0 0 0 0 0 0 0 0 1 8
+	.byte 8 0 0 0 0 0 0 0 0 0 0 0 0 0 0 8
 	.byte 8 0 8 8 0 8 8 0 8 0 8 8 0 8 0 8
 	.byte 8 0 8 8 0 8 8 0 8 0 8 8 0 8 0 8
 	.byte 8 0 0 0 0 8 8 0 8 0 8 8 0 8 0 8
 	.byte 8 0 8 8 0 8 8 0 0 0 0 0 0 0 0 8
-	.byte 8 0 0 0 0 0 0 1 8 8 8 8 8 1 8 8
-	.byte 8 1 8 8 0 8 8 0 0 0 0 0 1 8 8 8
+	.byte 8 0 0 0 0 0 0 0 8 8 8 8 8 0 8 8
+	.byte 8 0 8 8 0 8 8 0 0 0 0 0 0 8 8 8
 	.byte 8 8 8 8 8 8 8 8 8 8 8 9 8 8 8 8
 TILE_COLORS: TILE_COLORS
 PLAYER:
-	.word 1, 1, 0, 0 # 0: X coord, 4: Y coord, 8: Coins
+	.word 1, 1, 0, 0 # 0: X coord, 4: Y coord, 8: Coins, 12: Points
 ENEMIES_EASY:
 	.word  1,  8, 0, 0
 	.word  7,  4, 0, 0
@@ -38,63 +38,20 @@ ENEMIES_HARD:
 	.word 14, 12, 0, 0
 	.word 7 , 10, 0, 0
 	.word 12, 5, 0 , 0
-GAME_WON_MSG: .asciiz "GAME WON\nPOINTS: "
-HEXA_POINTS: .asciiz "PUNTUACION HEXADECIMAL:"
-BINARY_POINTS: .asciiz "PUNTUACION BINARIO: "
-OCTAL_POINTS: .asciiz "PUNTUACION OCTAL:"
-GAME_LOST_MSG: .asciiz "GAME OVER\nPOINTS:"
-SELECT_DIFFICULTY: .asciiz "Selecciona la dificultad: 1 Fácil 2 Difícil\n"
+GAME_WON_MSG: .asciiz "GAME WON!!!"
+HEXA_POINTS: .asciiz "\nPUNTUACION HEXADECIMAL: "
+BINARY_POINTS: .asciiz "\nPUNTUACION BINARIO: "
+OCTAL_POINTS: .asciiz "\nPUNTUACION OCTAL: "
+DECIMAL_POINTS: .asciiz "\nPUNTUACION DECIMAL: "
+GAME_LOST_MSG: .asciiz "GAME OVER..."
+SELECT_DIFFICULTY: .asciiz "Selecciona la dificultad: 1 FÃ¡cil 2 DifÃ­cil\n"
 
-Octal_Result: .space 20
-Binary_Result: .space 20
-Hexadecimal_Result: .space 20  #Esto esta guardado al reves
+Octal_Result: .space 32
+Binary_Result: .space 32
+Hexadecimal_Result: .space 32
 hex_digits:     .asciiz "0123456789ABCDEF"
-.text
-#------------------------Macro Para Transformar de Decimal a Octal ----------------------------------------------------------------#
-.macro DecimalToOctal(%decimal)
-	li $t7 8 #Base 8 por la que vamos a dividir
-	li $t8 0 
-	deciOctal_loop: 
-		    div %decimal, $t7    8
-    		    mfhi $t6        
-                    addi $t6, $t6, '0' 
-                    sb $t6, Octal_Result($t8
-                    addi $t8, $t8, 1  
-                    mflo %decimal       
-                    bnez %decimal, deciOctal_loop
-          .end_macro 
-                    
-#-------------------------------Macro para Transformar de Decimal a Binario-------------------------------------------------#
 
-	.macro DecimalToBinary(%decimal)
-	li $t7 2 #Base 2 por la que vamos a dividir
-	li $t8 0 
-	deciOctal_loop: 
-		    div %decimal, $t7    
-    		    mfhi $t6        
-                    addi $t6, $t6, '0' # Convertir el residuo a caracter para poder ser guardado
-                    sb $t6, Binary_Result($t8) 
-                    addi $t8, $t8, 1  
-                    mflo %decimal        
-                    bnez %decimal, deciOctal_loop
-           .end_macro 
-           
- #-----------------Macro para Transformar de Decimal a Hexadecimal ---------------------------------------#
- 	.macro DecimalToHexa(%decimal)
-     li $t1, 16       # Base 16
-
-    
-    li $t3, 0        
-loop:
-    divu %decimal, $t1    
-    mfhi $t2       
-    lb $a0, hex_digits($t2)  # Obtener el carácter correspondiente al residuo de la cadena de digitos declarada
-    sb $a0, Hexadecimal_Result($t3)   
-    addi $t3, $t3, 1  
-    mflo %decimal         
-    bnez %decimal, loop   
-    .end_macro 
-
+	.text
 	.globl main
 	
 main:
@@ -106,10 +63,10 @@ main:
     
     li $v0, 5
     syscall
-    move $t6, $v0  # Almacena la dificultad
+    move $s0, $v0  # Almacena la dificultad
     
-    beq $t6, 1, main_prepare_map_easy
-    beq $t6, 2, main_prepare_map_hard
+    beq $s0, 1, main_prepare_map_easy
+    beq $s0, 2, main_prepare_map_hard
     b main
     
 
@@ -148,7 +105,7 @@ main_prepare_map_easy:
 	lbu $t0, MAP_MEMORY($t2)
 	SET_TILE($t0, T_ENEMY)
 	sb $t0, MAP_MEMORY($t2)
-	j main_loop
+	b main_start
 	
 main_prepare_map_hard:
 	lw $t0, PLAYER+0
@@ -199,7 +156,11 @@ main_prepare_map_hard:
 	lbu $t0, MAP_MEMORY($t2)
 	SET_TILE($t0, T_ENEMY)
 	sb $t0, MAP_MEMORY($t2)
-	j main_loop
+	b main_start
+	
+main_start:
+	li $a0, 8
+	jal prepare_coins
 	
 main_loop:
 	jal paint_map
@@ -230,8 +191,8 @@ main_poll_end:
 	beq $v0, 2, main_save_coin
 	beq $v0, 3, main_game_lost
 	beq $v0, 4, main_game_won
-	beq $t6, 1 main_loop_end_easy
-	beq $t6, 2 main_loop_end_hard
+	beq $s0, 1, main_loop_end_easy
+	beq $s0, 2, main_loop_end_hard
 
 main_loop_end_easy:
 	la $a0, ENEMIES_EASY+0x00
@@ -277,11 +238,11 @@ main_save_coin:
    sw $t0, PLAYER+8         
 
    lw $t1, PLAYER+12       
-   addiu $t1, $t1, 100      # Incrementar la puntuación por cada moneda (100 puntos)
+   addiu $t1, $t1, 100      # Incrementar la puntuaciÃ³n por cada moneda (100 puntos)
    sw $t1, PLAYER+12      
 
-   beq $t6, 1, main_loop_end_easy
-   beq $t6, 2, main_loop_end_hard
+   beq $s0, 1, main_loop_end_easy
+   beq $s0, 2, main_loop_end_hard
 
 
 main_game_lost:
@@ -290,9 +251,8 @@ main_game_lost:
 	li $v0, 4
 	syscall
 	
-	lw $a0, PLAYER +12
-	li $v0, 1
-	syscall
+	lw $a0, PLAYER+12
+	jal print_score
 	
 	li $v0, 10
 	syscall
@@ -300,21 +260,47 @@ main_game_lost:
 main_game_won:
 	jal paint_map
 	
-	   lw $t1, PLAYER+12       
-   	   addiu $t1, $t1, 200      # Incrementar la puntuación por Victoria (200puntos)
-           sw $t1, PLAYER+12  
+	lw $t1, PLAYER+12       
+   	addiu $t1, $t1, 1200      # Incrementar la puntuaciÃ³n por Victoria (1200puntos)
+    sw $t1, PLAYER+12  
 	
 	la $a0, GAME_WON_MSG
 	li $v0, 4
 	syscall
 	
-	lw $a0, PLAYER+12
-	li $v0, 1
-	syscall
+	move $a0, $t1
+	jal print_score
 	
 	li $v0, 10
 	syscall
 
+
+# ---- PARAMS ----- #
+# $a0: Coin number
+# ---- VARIABLES ----- #
+# $a0: Random position
+# $t0: Coin number
+# $t1: Tile value
+#
+prepare_coins:
+	move $t0, $a0
+prepare_coins__loop:
+	subu $t0, $t0, 1
+prepare_coins__loop_repeat:
+	
+	li $a0, 0
+	li $a1, MAP_MEMORY_SIZE
+	li $v0, 42
+	syscall
+	
+	lbu $t1, MAP_MEMORY($a0)
+	bnez $t1, prepare_coins__loop_repeat
+	
+	or $t1, $t1, T_COIN
+	sb $t1, MAP_MEMORY($a0)
+prepare_coins__loop_end:
+	bnez $t0, prepare_coins__loop
+	jr $ra
 
 # ---- VARIABLES ----- #
 # $t0: Map index
@@ -332,6 +318,66 @@ paint_map__loop:
 	addu $t0, $t0, 1
 	addu $t1, $t1, 4
 	bltu $t0, MAP_MEMORY_SIZE, paint_map__loop
+	jr $ra
+	
+	
+# ---- PARAMS ----- #
+# $a0: Score
+# ---- VARIABLES ----- #
+#
+print_score:
+	subu $sp, $sp, 8
+	sw $ra, 0($sp)
+	sw $a0, 4($sp)
+
+	# Binary
+	la $a0, BINARY_POINTS
+	li $v0, 4
+	syscall
+	
+	lw $a0, 4($sp)
+	jal decimal_to_binary
+	move $a0, $v0
+	
+	li $v0, 4
+	syscall
+	
+	# Octal
+	la $a0, OCTAL_POINTS
+	li $v0, 4
+	syscall
+	
+	lw $a0, 4($sp)
+	jal decimal_to_octal
+	move $a0, $v0
+	
+	li $v0, 4
+	syscall
+	
+	# Hexadecimal
+	la $a0, HEXA_POINTS
+	li $v0, 4
+	syscall
+	
+	lw $a0, 4($sp)
+	jal decimal_to_hexadecimal
+	move $a0, $v0
+	
+	li $v0, 4
+	syscall
+	
+	# Decimal
+	la $a0, DECIMAL_POINTS
+	li $v0, 4
+	syscall
+	
+	lw $a0, 4($sp)
+	li $v0, 1
+	syscall
+	
+	# Return
+	lw $ra, 0($sp)
+	addu $sp, $sp, 8
 	jr $ra
 
 # ---- PARAMS ----- #
@@ -512,3 +558,51 @@ move_enemy__right:
 	addu $t2, $t0, 1
 	move $t3, $t1
 	b move_enemy__check
+	
+#-----------------Subrutina para Transformar de Decimal a Binario ---------------------------------------#
+decimal_to_binary:
+	move $t0, $a0
+	li $t7, 2
+	li $t8, 31
+decimal_to_binary__loop:
+    subu $t8, $t8, 1  
+	div $t0, $t7    
+    mfhi $t6       
+    mflo $t0 
+    addi $t6, $t6, '0'
+    sb $t6, Binary_Result($t8) 
+    bnez $t0, decimal_to_binary__loop
+    la $v0, Binary_Result($t8)
+    jr $ra
+    
+#-----------------Subrutina para Transformar de Decimal a Octal ---------------------------------------#
+decimal_to_octal:
+	move $t0, $a0
+	li $t7, 8
+	li $t8, 31
+decimal_to_octal__loop: 
+            subu $t8, $t8, 1  
+		    div $t0, $t7
+    		    mfhi $t6   
+                    mflo $t0        
+                    addi $t6, $t6, '0' 
+                    sb $t6, Octal_Result($t8)
+                    bnez $t0, decimal_to_octal__loop
+                    la $v0, Octal_Result($t8)
+                    jr $ra
+
+#-----------------Subrutina para Transformar de Decimal a Hexadecimal ---------------------------------------#                 
+decimal_to_hexadecimal:
+	move $t0, $a0
+    li $t1, 16       # Base 16
+    li $t3, 31      
+decimal_to_hexadecimal__loop:
+    subi $t3, $t3, 1      
+    divu $t0, $t1    
+    mfhi $t2       
+    mflo $t0
+    lb $t2, hex_digits($t2)  # Obtener el carï¿½cter correspondiente al residuo de la cadena de digitos declarada
+    sb $t2, Hexadecimal_Result($t3)   
+    bnez $t0, decimal_to_hexadecimal__loop  
+    la $v0, Hexadecimal_Result($t3)
+    jr $ra
